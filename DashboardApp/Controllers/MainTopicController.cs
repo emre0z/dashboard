@@ -1,7 +1,8 @@
-﻿using DashboardApp.Contexts;
-using DashboardApp.Data.Entity;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-
+using DashboardApp.Contexts;
+using DashboardApp.Data.Entity;
+using DashboardApp.DTOs;
 
 namespace DashboardApp.Controllers
 {
@@ -10,20 +11,23 @@ namespace DashboardApp.Controllers
     public class MainTopicController : ControllerBase
     {
         private readonly DashboardDb _context;
+        private readonly IMapper _mapper;
 
-        public MainTopicController(DashboardDb context)
+        public MainTopicController(DashboardDb context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        //Bir sayfada ya da uygulama ekranında tüm MainTopic kayıtlarını listelemek istediğimizde kullanılır.
+
         // GET: api/MainTopic
         [HttpGet]
         public IActionResult GetAllMainTopics()
         {
             var mainTopics = _context.MainTopics.ToList();
-            return Ok(mainTopics);
+            var mainTopicDtos = _mapper.Map<List<MainTopicDto>>(mainTopics);
+            return Ok(mainTopicDtos);
         }
-        //Belirli bir MainTopic başlığına ilişkin detaylı bilgileri almak istediğimizde kullanılır.
+
         // GET: api/MainTopic/{id}
         [HttpGet("{id}")]
         public IActionResult GetMainTopicById(int id)
@@ -33,32 +37,36 @@ namespace DashboardApp.Controllers
             {
                 return NotFound();
             }
-            return Ok(mainTopic);
+
+            var mainTopicDto = _mapper.Map<MainTopicDto>(mainTopic);
+            return Ok(mainTopicDto);
         }
-        //Yeni bir başlık eklemek veya sistemde yeni veri kayıtları oluşturmak istediğimizde kullanılır.
+
         // POST: api/MainTopic
         [HttpPost]
-        public IActionResult CreateMainTopic([FromBody] MainTopic newMainTopic)
+        public IActionResult CreateMainTopic([FromBody] MainTopicDto newMainTopicDto)
         {
-            if (newMainTopic == null)
+            if (newMainTopicDto == null)
             {
                 return BadRequest();
             }
 
+            var newMainTopic = _mapper.Map<MainTopic>(newMainTopicDto);
             newMainTopic.CreatedDate = DateTime.Now;
-            newMainTopic.CreatedUser = "User1"; // Kullanıcı adı oturumdan veya kimlik doğrulama ile alınabilir
+            newMainTopic.CreatedUser = "User1";
 
             _context.MainTopics.Add(newMainTopic);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetMainTopicById), new { id = newMainTopic.Id }, newMainTopic);
+            var mainTopicDto = _mapper.Map<MainTopicDto>(newMainTopic);
+            return CreatedAtAction(nameof(GetMainTopicById), new { id = mainTopicDto.Id }, mainTopicDto);
         }
-        // Mevcut MainTopic verilerinin güncellenmesi gerektiğinde, örneğin başlık adında ya da içeriğinde bir değişiklik yapılması gerektiğinde kullanılır.
+
         // PUT: api/MainTopic/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateMainTopic(int id, [FromBody] MainTopic updatedMainTopic)
+        public IActionResult UpdateMainTopic(int id, [FromBody] MainTopicDto updatedMainTopicDto)
         {
-            if (updatedMainTopic == null || updatedMainTopic.Id != id)
+            if (updatedMainTopicDto == null || updatedMainTopicDto.Id != id)
             {
                 return BadRequest();
             }
@@ -69,16 +77,16 @@ namespace DashboardApp.Controllers
                 return NotFound();
             }
 
-            mainTopic.Tittle = updatedMainTopic.Tittle;
+            _mapper.Map(updatedMainTopicDto, mainTopic);
             mainTopic.UpdateDate = DateTime.Now;
-            mainTopic.UpdateUser = "User1"; // Oturumdan alınabilir
+            mainTopic.UpdateUser = "User1";
 
             _context.MainTopics.Update(mainTopic);
             _context.SaveChanges();
 
             return NoContent();
         }
-        //Artık geçerliliğini yitirmiş veya sistemden kaldırılması gereken MainTopic verilerini silmek için kullanılır.
+
         // DELETE: api/MainTopic/{id}
         [HttpDelete("{id}")]
         public IActionResult DeleteMainTopic(int id)

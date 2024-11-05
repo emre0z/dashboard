@@ -13,10 +13,10 @@ namespace DashboardApp.Contexts
         {
 
         }
-        public DbSet<MainTopic> MainTopics { get; set; }
-        public DbSet<SubTopic> SubTopics { get; set; }
-        public DbSet<URL> URLs { get; set; }
-        public DbSet<Info> Infos { get; set; }
+        public DbSet<MainTopic>? MainTopics { get; set; }
+        public DbSet<SubTopic>? SubTopics { get; set; }
+        public DbSet<URL>? URLs { get; set; }
+        public DbSet<Info>? Infos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

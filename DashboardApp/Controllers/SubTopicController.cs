@@ -1,19 +1,22 @@
-﻿using DashboardApp.Contexts;
+﻿using AutoMapper;
+using DashboardApp.Contexts;
 using DashboardApp.Data.Entity;
+using DashboardApp.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-
-namespace YourNamespace.Controllers
+namespace DashboardApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class SubTopicController : ControllerBase
     {
         private readonly DashboardDb _context;
+        private readonly IMapper _mapper;
 
-        public SubTopicController(DashboardDb context)
+        public SubTopicController(DashboardDb context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/SubTopic
@@ -21,7 +24,8 @@ namespace YourNamespace.Controllers
         public IActionResult GetAllSubTopics()
         {
             var subTopics = _context.SubTopics.ToList();
-            return Ok(subTopics);
+            var subTopicDtos = _mapper.Map<List<SubTopicDto>>(subTopics);
+            return Ok(subTopicDtos);
         }
 
         // GET: api/SubTopic/{id}
@@ -33,32 +37,35 @@ namespace YourNamespace.Controllers
             {
                 return NotFound();
             }
-            return Ok(subTopic);
+
+            var subTopicDto = _mapper.Map<SubTopicDto>(subTopic);
+            return Ok(subTopicDto);
         }
 
         // POST: api/SubTopic
         [HttpPost]
-        public IActionResult CreateSubTopic([FromBody] SubTopic newSubTopic)
+        public IActionResult CreateSubTopic([FromBody] SubTopicDto newSubTopicDto)
         {
-            if (newSubTopic == null)
+            if (newSubTopicDto == null)
             {
                 return BadRequest();
             }
 
-            newSubTopic.CreatedDate = DateTime.Now;
-            newSubTopic.CreatedUser = "User1";
+            var subTopic = _mapper.Map<SubTopic>(newSubTopicDto);
+            subTopic.CreatedDate = DateTime.Now;
+            subTopic.CreatedUser = "User1";
 
-            _context.SubTopics.Add(newSubTopic);
+            _context.SubTopics.Add(subTopic);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetSubTopicById), new { id = newSubTopic.Id }, newSubTopic);
+            return CreatedAtAction(nameof(GetSubTopicById), new { id = subTopic.Id }, newSubTopicDto);
         }
 
         // PUT: api/SubTopic/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateSubTopic(int id, [FromBody] SubTopic updatedSubTopic)
+        public IActionResult UpdateSubTopic(int id, [FromBody] SubTopicDto updatedSubTopicDto)
         {
-            if (updatedSubTopic == null || updatedSubTopic.Id != id)
+            if (updatedSubTopicDto == null || updatedSubTopicDto.Id != id)
             {
                 return BadRequest();
             }
@@ -69,27 +76,11 @@ namespace YourNamespace.Controllers
                 return NotFound();
             }
 
-            subTopic.Tittle = updatedSubTopic.Tittle;
+            _mapper.Map(updatedSubTopicDto, subTopic);
             subTopic.UpdateDate = DateTime.Now;
             subTopic.UpdateUser = "User1";
 
             _context.SubTopics.Update(subTopic);
-            _context.SaveChanges();
-
-            return NoContent();
-        }
-
-        // DELETE: api/SubTopic/{id}
-        [HttpDelete("{id}")]
-        public IActionResult DeleteSubTopic(int id)
-        {
-            var subTopic = _context.SubTopics.Find(id);
-            if (subTopic == null)
-            {
-                return NotFound();
-            }
-
-            _context.SubTopics.Remove(subTopic);
             _context.SaveChanges();
 
             return NoContent();

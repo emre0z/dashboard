@@ -1,19 +1,23 @@
-﻿using DashboardApp.Contexts;
+﻿using AutoMapper;
+using DashboardApp.Contexts;
 using DashboardApp.Data.Entity;
+using DashboardApp.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace YourNamespace.Controllers
+namespace DashboardApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class URLController : ControllerBase
     {
         private readonly DashboardDb _context;
+        private readonly IMapper _mapper;
 
-        public URLController(DashboardDb context)
+        public URLController(DashboardDb context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/URL
@@ -21,7 +25,8 @@ namespace YourNamespace.Controllers
         public IActionResult GetAllURLs()
         {
             var urls = _context.URLs.ToList();
-            return Ok(urls);
+            var urlDtos = _mapper.Map<List<UrlDto>>(urls);
+            return Ok(urlDtos);
         }
 
         // GET: api/URL/{id}
@@ -33,32 +38,35 @@ namespace YourNamespace.Controllers
             {
                 return NotFound();
             }
-            return Ok(url);
+
+            var urlDto = _mapper.Map<UrlDto>(url);
+            return Ok(urlDto);
         }
 
         // POST: api/URL
         [HttpPost]
-        public IActionResult CreateURL([FromBody] URL newURL)
+        public IActionResult CreateURL([FromBody] UrlDto newUrlDto)
         {
-            if (newURL == null)
+            if (newUrlDto == null)
             {
                 return BadRequest();
             }
 
-            newURL.CreatedDate = DateTime.Now;
-            newURL.CreatedUser = "User1";
+            var url = _mapper.Map<URL>(newUrlDto);
+            url.CreatedDate = DateTime.Now;
+            url.CreatedUser = "User1";
 
-            _context.URLs.Add(newURL);
+            _context.URLs.Add(url);
             _context.SaveChanges();
 
-            return CreatedAtAction(nameof(GetURLById), new { id = newURL.Id }, newURL);
+            return CreatedAtAction(nameof(GetURLById), new { id = url.Id }, newUrlDto);
         }
 
         // PUT: api/URL/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateURL(int id, [FromBody] URL updatedURL)
+        public IActionResult UpdateURL(int id, [FromBody] UrlDto updatedUrlDto)
         {
-            if (updatedURL == null || updatedURL.Id != id)
+            if (updatedUrlDto == null || updatedUrlDto.Id != id)
             {
                 return BadRequest();
             }
@@ -69,27 +77,11 @@ namespace YourNamespace.Controllers
                 return NotFound();
             }
 
-            url.Content = updatedURL.Content;
+            _mapper.Map(updatedUrlDto, url);
             url.UpdateDate = DateTime.Now;
             url.UpdateUser = "User1";
 
             _context.URLs.Update(url);
-            _context.SaveChanges();
-
-            return NoContent();
-        }
-
-        // DELETE: api/URL/{id}
-        [HttpDelete("{id}")]
-        public IActionResult DeleteURL(int id)
-        {
-            var url = _context.URLs.Find(id);
-            if (url == null)
-            {
-                return NotFound();
-            }
-
-            _context.URLs.Remove(url);
             _context.SaveChanges();
 
             return NoContent();

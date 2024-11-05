@@ -1,14 +1,13 @@
-﻿namespace DashboardApp.Data.Entity
+﻿namespace DashboardApp.Data.Entity;
+
+public class Info : BaseEntity
 {
-    public class Info : BaseEntity
-    {
-        public int Id { get; set; }
-        public string Content { get; set; }
-        public string InfoKey { get; set; }
-        public int? SubTopicId { get; set; }
+    public int Id { get; set; }
+    public string? Content { get; set; }
+    public string? InfoKey { get; set; }
+    public int? SubTopicId { get; set; }
 
-        // navigasyon
-        public virtual SubTopic SubTopic { get; set; }
+    // navigasyon
+    public virtual SubTopic? SubTopic { get; set; }
 
-    }
 }
