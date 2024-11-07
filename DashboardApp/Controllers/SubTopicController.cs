@@ -3,6 +3,7 @@ using DashboardApp.Contexts;
 using DashboardApp.Data.Entity;
 using DashboardApp.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DashboardApp.Controllers
 {
@@ -19,20 +20,24 @@ namespace DashboardApp.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/SubTopic
         [HttpGet]
         public IActionResult GetAllSubTopics()
         {
-            var subTopics = _context.SubTopics.ToList();
+            var subTopics = _context.SubTopics
+                                    .Include(st => st.URLs)
+                                    .Include(st => st.Infos)
+                                    .ToList();
             var subTopicDtos = _mapper.Map<List<SubTopicDto>>(subTopics);
             return Ok(subTopicDtos);
         }
 
-        // GET: api/SubTopic/{id}
         [HttpGet("{id}")]
         public IActionResult GetSubTopicById(int id)
         {
-            var subTopic = _context.SubTopics.Find(id);
+            var subTopic = _context.SubTopics
+                                   .Include(st => st.URLs)
+                                   .Include(st => st.Infos)
+                                   .FirstOrDefault(st => st.Id == id);
             if (subTopic == null)
             {
                 return NotFound();
@@ -42,7 +47,6 @@ namespace DashboardApp.Controllers
             return Ok(subTopicDto);
         }
 
-        // POST: api/SubTopic
         [HttpPost]
         public IActionResult CreateSubTopic([FromBody] SubTopicDto newSubTopicDto)
         {
@@ -52,16 +56,12 @@ namespace DashboardApp.Controllers
             }
 
             var subTopic = _mapper.Map<SubTopic>(newSubTopicDto);
-            subTopic.CreatedDate = DateTime.Now;
-            subTopic.CreatedUser = "User1";
-
             _context.SubTopics.Add(subTopic);
             _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetSubTopicById), new { id = subTopic.Id }, newSubTopicDto);
         }
 
-        // PUT: api/SubTopic/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateSubTopic(int id, [FromBody] SubTopicDto updatedSubTopicDto)
         {
@@ -77,10 +77,22 @@ namespace DashboardApp.Controllers
             }
 
             _mapper.Map(updatedSubTopicDto, subTopic);
-            subTopic.UpdateDate = DateTime.Now;
-            subTopic.UpdateUser = "User1";
-
             _context.SubTopics.Update(subTopic);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteSubTopic(int id)
+        {
+            var subTopic = _context.SubTopics.Find(id);
+            if (subTopic == null)
+            {
+                return NotFound();
+            }
+
+            _context.SubTopics.Remove(subTopic);
             _context.SaveChanges();
 
             return NoContent();

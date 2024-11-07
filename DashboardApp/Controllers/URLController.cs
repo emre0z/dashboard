@@ -4,7 +4,6 @@ using DashboardApp.Data.Entity;
 using DashboardApp.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace DashboardApp.Controllers
 {
     [Route("api/[controller]")]
@@ -20,7 +19,6 @@ namespace DashboardApp.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/URL
         [HttpGet]
         public IActionResult GetAllURLs()
         {
@@ -29,7 +27,6 @@ namespace DashboardApp.Controllers
             return Ok(urlDtos);
         }
 
-        // GET: api/URL/{id}
         [HttpGet("{id}")]
         public IActionResult GetURLById(int id)
         {
@@ -43,7 +40,6 @@ namespace DashboardApp.Controllers
             return Ok(urlDto);
         }
 
-        // POST: api/URL
         [HttpPost]
         public IActionResult CreateURL([FromBody] UrlDto newUrlDto)
         {
@@ -53,16 +49,12 @@ namespace DashboardApp.Controllers
             }
 
             var url = _mapper.Map<URL>(newUrlDto);
-            url.CreatedDate = DateTime.Now;
-            url.CreatedUser = "User1";
-
             _context.URLs.Add(url);
             _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetURLById), new { id = url.Id }, newUrlDto);
         }
 
-        // PUT: api/URL/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateURL(int id, [FromBody] UrlDto updatedUrlDto)
         {
@@ -78,14 +70,25 @@ namespace DashboardApp.Controllers
             }
 
             _mapper.Map(updatedUrlDto, url);
-            url.UpdateDate = DateTime.Now;
-            url.UpdateUser = "User1";
-
             _context.URLs.Update(url);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteURL(int id)
+        {
+            var url = _context.URLs.Find(id);
+            if (url == null)
+            {
+                return NotFound();
+            }
+
+            _context.URLs.Remove(url);
             _context.SaveChanges();
 
             return NoContent();
         }
     }
 }
-

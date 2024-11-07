@@ -19,16 +19,14 @@ namespace DashboardApp.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Info
         [HttpGet]
         public IActionResult GetAllInfos()
         {
-            List<Info> infos = _context.Infos.ToList();
+            var infos = _context.Infos.ToList();
             var infoDtos = _mapper.Map<List<InfoDto>>(infos);
             return Ok(infoDtos);
         }
 
-        // GET: api/Info/{id}
         [HttpGet("{id}")]
         public IActionResult GetInfoById(int id)
         {
@@ -42,7 +40,6 @@ namespace DashboardApp.Controllers
             return Ok(infoDto);
         }
 
-        // POST: api/Info
         [HttpPost]
         public IActionResult CreateInfo([FromBody] InfoDto newInfoDto)
         {
@@ -52,16 +49,12 @@ namespace DashboardApp.Controllers
             }
 
             var info = _mapper.Map<Info>(newInfoDto);
-            info.CreatedDate = DateTime.Now;
-            info.CreatedUser = "User1";
-
             _context.Infos.Add(info);
             _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetInfoById), new { id = info.Id }, newInfoDto);
         }
 
-        // PUT: api/Info/{id}
         [HttpPut("{id}")]
         public IActionResult UpdateInfo(int id, [FromBody] InfoDto updatedInfoDto)
         {
@@ -77,14 +70,25 @@ namespace DashboardApp.Controllers
             }
 
             _mapper.Map(updatedInfoDto, info);
-            info.UpdateDate = DateTime.Now;
-            info.UpdateUser = "User1";
-
             _context.Infos.Update(info);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteInfo(int id)
+        {
+            var info = _context.Infos.Find(id);
+            if (info == null)
+            {
+                return NotFound();
+            }
+
+            _context.Infos.Remove(info);
             _context.SaveChanges();
 
             return NoContent();
         }
     }
 }
-
