@@ -4,6 +4,7 @@ using DashboardApp.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DashboardApp.Migrations
 {
     [DbContext(typeof(DashboardDb))]
-    partial class DashboardDbModelSnapshot : ModelSnapshot
+    [Migration("20241125054244_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,9 +132,6 @@ namespace DashboardApp.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ContentTittle")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -159,8 +158,7 @@ namespace DashboardApp.Migrations
                 {
                     b.HasOne("DashboardApp.Data.Entity.SubTopic", "SubTopic")
                         .WithMany("Infos")
-                        .HasForeignKey("SubTopicId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("SubTopicId");
 
                     b.Navigation("SubTopic");
                 });
@@ -178,8 +176,7 @@ namespace DashboardApp.Migrations
                 {
                     b.HasOne("DashboardApp.Data.Entity.SubTopic", "SubTopic")
                         .WithMany("URLs")
-                        .HasForeignKey("SubTopicId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("SubTopicId");
 
                     b.Navigation("SubTopic");
                 });

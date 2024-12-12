@@ -1,8 +1,11 @@
-﻿namespace DashboardApp.DTOs;
-
-public class UrlDto
+﻿namespace DashboardApp.DTOs
 {
-    public int Id { get; set; }
-    public string Content { get; set; }
-    public int SubTopicId { get; set; }
+    public class UrlDto
+    {
+        public int Id { get; set; }
+        public string Content { get; set; }
+        public string? ContentTittle { get; set; }
+        public int SubTopicId { get; set; }
+    }
 }
+

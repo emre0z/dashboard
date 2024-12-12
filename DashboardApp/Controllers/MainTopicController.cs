@@ -47,6 +47,7 @@ namespace DashboardApp.Controllers
 
         [HttpPost]
         public IActionResult CreateMainTopic([FromBody] MainTopicDto newMainTopicDto)
+        
         {
             if (newMainTopicDto == null)
             {

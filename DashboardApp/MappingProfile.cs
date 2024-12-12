@@ -12,3 +12,4 @@ public class MappingProfile : Profile
         CreateMap<Info, InfoDto>().ReverseMap();
     }
 }
+

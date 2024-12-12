@@ -69,7 +69,12 @@ namespace DashboardApp.Controllers
             {
                 return BadRequest();
             }
-
+            var infos = _context.Infos.Where(x => x.SubTopicId == id);
+            var urls = _context.URLs.Where(x => x.SubTopicId == id);
+            if (infos.Any())
+                _context.RemoveRange(infos);
+            if (urls.Any())
+                _context.RemoveRange(urls);
             var subTopic = _context.SubTopics.Find(id);
             if (subTopic == null)
             {
@@ -86,16 +91,27 @@ namespace DashboardApp.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteSubTopic(int id)
         {
-            var subTopic = _context.SubTopics.Find(id);
+            var subTopic = _context.SubTopics
+                                   .Include(st => st.URLs)
+                                   .Include(st => st.Infos)
+                                   .FirstOrDefault(st => st.Id == id);
+
             if (subTopic == null)
             {
                 return NotFound();
             }
 
+            // İlişkili URL ve Info kayıtlarını sil
+            _context.URLs.RemoveRange(subTopic.URLs);
+            _context.Infos.RemoveRange(subTopic.Infos);
+
+            // SubTopic kaydını sil
             _context.SubTopics.Remove(subTopic);
             _context.SaveChanges();
 
             return NoContent();
         }
+
     }
 }
+

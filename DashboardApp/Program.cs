@@ -8,6 +8,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DashboardDb>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// CORS Yapýlandýrmasý (Tüm Originlere Ýzin Veriliyor)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin() // Herhangi bir kaynaktan gelen isteklere izin verir
+               .AllowAnyHeader() // Header kýsýtlamasý yok
+               .AllowAnyMethod(); // GET, POST, PUT, DELETE gibi her metoda izin verir
+    });
+});
 
 // Diðer servis yapýlandýrmalarý
 builder.Services.AddControllersWithViews();
@@ -28,6 +38,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS Middleware (Tüm originlere izin veren yapýlandýrmayý etkinleþtirir)
+app.UseCors();
 
 app.UseAuthorization();
 

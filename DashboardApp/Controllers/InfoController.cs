@@ -27,6 +27,14 @@ namespace DashboardApp.Controllers
             return Ok(infoDtos);
         }
 
+        [HttpGet("subtopic/{subTopicId}")]
+        public IActionResult GetInfosBySubTopicId(int subTopicId)
+        {
+            var infos = _context.Infos.Where(i => i.SubTopicId == subTopicId).ToList();
+            var infoDtos = _mapper.Map<List<InfoDto>>(infos);
+            return Ok(infoDtos);
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetInfoById(int id)
         {

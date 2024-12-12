@@ -27,6 +27,14 @@ namespace DashboardApp.Controllers
             return Ok(urlDtos);
         }
 
+        [HttpGet("subtopic/{subTopicId}")]
+        public IActionResult GetURLsBySubTopicId(int subTopicId)
+        {
+            var urls = _context.URLs.Where(u => u.SubTopicId == subTopicId).ToList();
+            var urlDtos = _mapper.Map<List<UrlDto>>(urls);
+            return Ok(urlDtos);
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetURLById(int id)
         {
@@ -60,13 +68,13 @@ namespace DashboardApp.Controllers
         {
             if (updatedUrlDto == null || updatedUrlDto.Id != id)
             {
-                return BadRequest();
+                return BadRequest("Geçersiz URL ID'si.");
             }
 
-            var url = _context.URLs.Find(id);
+            var url = _context.URLs.FirstOrDefault(u => u.Id == id);
             if (url == null)
             {
-                return NotFound();
+                return NotFound($"ID {id} ile eşleşen bir URL bulunamadı.");
             }
 
             _mapper.Map(updatedUrlDto, url);
@@ -75,6 +83,7 @@ namespace DashboardApp.Controllers
 
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public IActionResult DeleteURL(int id)
